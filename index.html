@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart Tourism Recommendation</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<header>
+    <h1>Explore India</h1>
+    <p>Discover destinations that match your budget and interests</p>
+</header>
+
+<div class="container">
+
+    <h2>Find Your Perfect Destination</h2>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+
+        <label>Enter Your Total Budget (₹)</label>
+        <input type="number" name="budget"
+               min="1" required placeholder="Example: 10000"
+               value="{{ budget if budget else '' }}">
+
+        <label>Travel Duration (Days)</label>
+        <input type="number" name="days"
+               min="1" max="30" required
+               value="{{ days if days else 2 }}">
+
+        <label>Select Destination Category</label>
+        <select name="category">
+            <option value="All" {% if category == 'All' %}selected{% endif %}>All Categories</option>
+            <option value="Nature" {% if category == 'Nature' %}selected{% endif %}>Nature</option>
+            <option value="Beach" {% if category == 'Beach' %}selected{% endif %}>Beach</option>
+            <option value="Heritage" {% if category == 'Heritage' %}selected{% endif %}>Heritage</option>
+            <option value="Hill Station" {% if category == 'Hill Station' %}selected{% endif %}>Hill Station</option>
+            <option value="Adventure" {% if category == 'Adventure' %}selected{% endif %}>Adventure</option>
+            <option value="Spiritual" {% if category == 'Spiritual' %}selected{% endif %}>Spiritual</option>
+        </select>
+
+        <button type="submit">Find Destinations</button>
+
+    </form>
+
+    {% if recommendations %}
+
+        <h2>Recommended Destinations</h2>
+
+        <div class="results">
+
+            {% for place in recommendations %}
+
+            <div class="card">
+
+                <h3>{{ place.Destination }}</h3>
+
+                <p><b>State:</b> {{ place.State }}</p>
+
+                <p><b>Category:</b> {{ place.Category }}</p>
+
+                <p><b>Daily Budget:</b>
+                    ₹{{ place.Estimated_Daily_Budget_INR }}
+                </p>
+
+                <p><b>Best Time:</b> {{ place.Best_Time }}</p>
+
+                <p>{{ place.Description }}</p>
+
+                <p><b>Attractions:</b>
+                    {{ place.Attractions.replace(';', ', ') }}
+                </p>
+
+                <hr>
+
+                <h3>Estimated Budget</h3>
+
+                <p><b>Total Trip Cost:</b>
+                    ₹{{ place.total_cost }}
+                </p>
+
+                <p>Accommodation: ₹{{ place.accommodation }}</p>
+                <p>Food: ₹{{ place.food }}</p>
+                <p>Local Transport: ₹{{ place.transport }}</p>
+
+                <hr>
+
+                <h3>Day-wise Itinerary</h3>
+
+                {% for item in place.itinerary %}
+
+                    <p><b>Day {{ item.day }}</b></p>
+
+                    <ul>
+                        {% for attraction in item.places %}
+                            <li>{{ attraction }}</li>
+                        {% endfor %}
+                    </ul>
+
+                {% endfor %}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <h2>Destination Budget Comparison</h2>
+
+        <img
+            src="{{ url_for('static', filename='budget_chart.png') }}"
+            alt="Budget Comparison Chart"
+        >
+
+    {% elif request.method == 'POST' and not error %}
+
+        <h3>No matching destinations found.</h3>
+
+        <p>Try increasing your budget or selecting All Categories.</p>
+
+    {% endif %}
+
+</div>
+
+<footer>
+    <p>Smart Tourism Recommendation System | AAT-2 Project</p>
+</footer>
+
+</body>
+</html>
